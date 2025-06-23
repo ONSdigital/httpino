@@ -87,7 +87,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.5</version>
+            <version>1.6.0</version>
         </dependency>
         <!-- Commons -->
         <dependency>
@@ -234,18 +234,6 @@
                     <!-- if CVSS >= 7.0 (high or critical) then ERROR else WARN -->
                     <fail>true</fail>
                     <cvssScoreThreshold>7.0</cvssScoreThreshold>
-
-                    <!-- Exclude vulnerable dependencies in forked version (0.0.8) of this library -->
-                    <excludeCoordinates>
-
-                        <!--- This is the latest version and has vulnerability CWE-770 - Allocation of Resources Without Limits or Throttling -->
-                        <exclude>
-                            <groupId>commons-fileupload</groupId>
-                            <artifactId>commons-fileupload</artifactId>
-                            <version>1.5</version>
-                        </exclude>
-
-                    </excludeCoordinates>
                 </configuration>
             </plugin>
 
