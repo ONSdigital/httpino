@@ -1,24 +1,24 @@
 package com.github.davidcarboni.httpino;
 
-import org.apache.http.StatusLine;
-
 /**
  * A data record to hold the essentials of an API response.
  * Created by david on 26/03/2015.
  */
 public class Response<T> {
 
-    public StatusLine statusLine;
+    public int statusCode;
     public T body;
+    public String reasonPhrase;
 
 
-    public Response(StatusLine statusLine, T body) {
-        this.statusLine = statusLine;
+    public Response(int statusCode, String reasonPhrase, T body) {
+        this.statusCode = statusCode;
+        this.reasonPhrase = reasonPhrase;
         this.body = body;
     }
 
     @Override
     public String toString() {
-        return statusLine.getStatusCode() + " " + statusLine.getReasonPhrase() + (body==null?"\n[no body]": "\nbody:\n" + body) ;
+        return statusCode + " " + reasonPhrase + (body==null?"\n[no body]": "\nbody:\n" + body) ;
     }
 }

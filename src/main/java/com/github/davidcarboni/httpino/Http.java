@@ -6,18 +6,22 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.FileBody;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
@@ -39,7 +43,7 @@ public class Http implements AutoCloseable {
      *
      * @param endpoint      The endpoint to send the request to.
      * @param responseClass The class to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>           The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -53,9 +57,8 @@ public class Http implements AutoCloseable {
 
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(get)) {
-            //System.out.println(response);
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -64,7 +67,7 @@ public class Http implements AutoCloseable {
      *
      * @param endpoint The endpoint to send the request to.
      * @param type     The type to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers  Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers  Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>      The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -78,9 +81,8 @@ public class Http implements AutoCloseable {
 
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(get)) {
-            //System.out.println(response);
             T body = deserialiseResponseMessage(response, type);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -88,7 +90,7 @@ public class Http implements AutoCloseable {
      * Sends a GET request and returns the response.
      *
      * @param endpoint The endpoint to send the request to.
-     * @param headers  Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers  Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @return A {@link Path} to the downloaded content, if any.
      * @throws IOException If an error occurs.
      * @see java.nio.file.Files#probeContentType(Path)
@@ -115,7 +117,7 @@ public class Http implements AutoCloseable {
                 }
             }
 
-            return new Response<>(response.getStatusLine(), tempFile);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), tempFile);
         }
     }
 
@@ -125,7 +127,7 @@ public class Http implements AutoCloseable {
      * @param endpoint       The endpoint to send the request to.
      * @param requestMessage A message to send in the request body. Can be null.
      * @param responseClass  The class to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers        Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers        Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>            The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -145,7 +147,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -156,7 +158,7 @@ public class Http implements AutoCloseable {
      *
      * @param endpoint      The endpoint to send the request to.
      * @param responseClass The class to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>           The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -173,7 +175,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -197,7 +199,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T responseBody = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), responseBody);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), responseBody);
         }
     }
 
@@ -234,7 +236,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -275,7 +277,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -311,7 +313,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(post)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -321,7 +323,7 @@ public class Http implements AutoCloseable {
      * @param endpoint       The endpoint to send the request to.
      * @param requestMessage A message to send in the request body. Can be null.
      * @param responseClass  The class to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers        Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers        Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>            The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -338,7 +340,7 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(put)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
@@ -347,7 +349,7 @@ public class Http implements AutoCloseable {
      *
      * @param endpoint      The endpoint to send the request to.
      * @param responseClass The class to deserialise the Json response to. Can be null if no response message is expected.
-     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param headers       Any additional headers to send with this request. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param <T>           The type to deserialise the response to.
      * @return A {@link Response} containing the deserialised body, if any.
      * @throws IOException If an error occurs.
@@ -361,14 +363,14 @@ public class Http implements AutoCloseable {
         // Send the request and process the response
         try (CloseableHttpResponse response = httpClient().execute(delete)) {
             T body = deserialiseResponseMessage(response, responseClass);
-            return new Response<>(response.getStatusLine(), body);
+            return new Response<>(response.getCode(), response.getReasonPhrase(), body);
         }
     }
 
     /**
      * Adds a header that will be used for all requests made by this instance.
      *
-     * @param name  The header name. You can use {@link org.apache.http.HttpHeaders} constants for header names.
+     * @param name  The header name. You can use {@link org.apache.hc.core5.http.HttpHeaders} constants for header names.
      * @param value The header value.
      */
     public void addHeader(String name, String value) {
@@ -427,7 +429,6 @@ public class Http implements AutoCloseable {
             fullHeaders[i + this.headers.size()] = new BasicHeader(header.getName(), header.getValue());
         }
 
-        //System.out.println(Arrays.toString(fullHeaders));
         return fullHeaders;
     }
 
@@ -440,7 +441,6 @@ public class Http implements AutoCloseable {
             fullHeaders[i] = this.headers.get(i);
         }
 
-        //System.out.println(Arrays.toString(fullHeaders));
         return fullHeaders;
     }
 
