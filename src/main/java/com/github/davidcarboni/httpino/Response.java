@@ -6,9 +6,9 @@ package com.github.davidcarboni.httpino;
  */
 public class Response<T> {
 
-    public int statusCode;
-    public T body;
-    public String reasonPhrase;
+    private int statusCode;
+    private T body;
+    private String reasonPhrase;
 
 
     public Response(int statusCode, String reasonPhrase, T body) {
@@ -20,5 +20,17 @@ public class Response<T> {
     @Override
     public String toString() {
         return statusCode + " " + reasonPhrase + (body==null?"\n[no body]": "\nbody:\n" + body) ;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public T getBody() {
+        return body;
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
     }
 }
