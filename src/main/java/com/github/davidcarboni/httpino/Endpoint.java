@@ -31,7 +31,7 @@ public class Endpoint {
     }
 
     /**
-     * Creates and endpoint for the given {@code host} string and {@code path}.
+     * Creates an endpoint for the given {@code host} string and {@code path}.
      *
      * @param host The base URL as a string, e.g. {@code http://localhost:8080/api/}.
      *             This will be used to instantiate a {@link Host}.
